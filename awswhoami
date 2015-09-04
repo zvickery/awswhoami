@@ -1,1 +1,46 @@
-whoami.py
+#!/usr/bin/env python
+
+import boto
+import boto.exception
+import json
+import os
+import re
+
+RC_FILE = os.path.expanduser('~/.awswhoamirc')
+
+conn = boto.connect_iam()
+
+try:
+    u = conn.get_user()
+    arn = u['get_user_response']['get_user_result']['user']['arn']
+except boto.exception.BotoServerError as e:
+    arn_text = re.search('User: ([^ ]+) is not authorized', e.error_message)
+    if arn_text:
+        arn = arn_text.group(1)
+
+if arn:
+    try:
+        with open(RC_FILE) as rc_file:
+            account_map = json.load(rc_file)
+    except (IOError, ValueError):
+        account_map = {}
+
+    account = None
+
+    for account_id in account_map:
+        if account_id in arn:
+            account = account_map[account_id]
+            break
+
+    # If there is no local account name mapping:
+    # 1) See if we have rights to pull it from AWS
+    # 2) If not, just print the number
+    if not account:
+        try:
+            r = conn.get_account_alias()['list_account_aliases_response']
+            account = r['list_account_aliases_result']['account_aliases'][0]
+        except boto.exception.BotoServerError:
+            account_id = re.search('\d+', arn)
+            account = account_id.group(0)
+
+    print("{} [{}]".format(arn, account))
