@@ -21,6 +21,6 @@ The AWS account alias will be used if the user has access to query this.  It is 
     }
 This capability allows customizing the AWS account name output regardless of the configured AWS account alias or rights to query it.
 #### Compatibility
-The tool is compatible with both python 2.7 and python 3.4.
+The tool is compatible with both python 2.7 and python 3.4.  The `boto` library is required to be present in the python installation.  `sudo pip install boto` will do the needful.  If you don't have `pip` (or `pip3`) available, it will need to be installed from your OS packages.
 #### Bugs
 The tool has been tested with a wide range of AWS IAM user permissions.  It's possible something has been missed of course.
