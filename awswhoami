@@ -9,6 +9,7 @@ import re
 RC_FILE = os.path.expanduser('~/.awswhoamirc')
 
 conn = boto.connect_iam()
+arn = None
 
 try:
     u = conn.get_user()
@@ -17,6 +18,8 @@ except boto.exception.BotoServerError as e:
     arn_text = re.search('User: ([^ ]+) is not authorized', e.error_message)
     if arn_text:
         arn = arn_text.group(1)
+    else:
+        print(e.error_message)
 
 if arn:
     try:
